@@ -39,10 +39,12 @@ class Connection
   # args  - Optional Array of arguments to pass.
   #
   # Returns nothing.
-  enqueue: (queue, func, args) ->
-    @redis.sadd  @key('queues'), queue
-    @redis.rpush @key('queue', queue),
-      JSON.stringify class: func, args: args || []
+  enqueue: (queue, func, args, callback) ->
+    redis = @redis
+    key = @key
+    redis.sadd  key('queues'), queue, (err) ->
+      return callback(err) if err
+      redis.rpush key('queue', queue), JSON.stringify class: func, args: args || [], callback
 
   # Public: Creates a single Worker from this Connection.
   #
